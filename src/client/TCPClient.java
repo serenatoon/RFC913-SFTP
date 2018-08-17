@@ -3,7 +3,7 @@
  * the Internet, second edition, copyright 1996-2002 J.F Kurose and K.W. Ross, 
  * All Rights Reserved.
  **/
-
+package client;
 import java.io.*; 
 import java.net.*; 
 class TCPClient { 
@@ -16,7 +16,7 @@ class TCPClient {
         BufferedReader inFromUser = 
 	    new BufferedReader(new InputStreamReader(System.in)); 
 	
-        Socket clientSocket = new Socket("hostname", 6789); 
+        Socket clientSocket = new Socket("localhost", 6789);
 	
         DataOutputStream outToServer = 
 	    new DataOutputStream(clientSocket.getOutputStream()); 
