@@ -19,6 +19,9 @@ class TCPServer {
     private static DataOutputStream outToClient;
 
     private static String jsonPath = System.getProperty("user.dir") + File.separator + "res" + File.separator + "users.json";
+    private static String serverDir = System.getProperty("user.dir") + File.separator + "res" + File.separator + "server";
+    private static String currentDir = serverDir + File.separator;
+    private static String cdirSaved = null;
 
     private static boolean loggedIn = false;
     private static String currentUser = null;
@@ -149,6 +152,18 @@ class TCPServer {
                     else if (input.length > 2) {
                         serverResponse = "-Too many arguments";
                     }
+                }
+            }
+            // CDIR command
+            else if (cmd.equals("CDIR")) {
+                if (input.length < 2) {
+                    serverResponse = "-Too few arguments";
+                }
+                else if (input.length > 2) {
+                    serverResponse = "-Too many arguments";
+                }
+                else {
+                    serverResponse = changeDir(input[1]);
                 }
             }
 
@@ -306,6 +321,31 @@ class TCPServer {
         }
         else {
             return "-Wrong password, try again";
+        }
+    }
+
+    // CDIR command
+    // attempts to change dir, checks if logged in
+    private static String changeDir(String dir) {
+        String path = currentDir + dir;
+        try {
+            if (new File(path).exists()) {
+                if (!loggedIn) { // save cdir command
+                    cdirSaved = dir;
+                    return "+directory ok, send account/password";
+                }
+                else { // currently logged in, so can change dir
+                    currentDir = path;
+                    cdirSaved = null;
+                    return "!Changed working dir to " + dir;
+                }
+            }
+            else {
+                return "-Can't connect to working directory because: Directory does not exist";
+            }
+        }
+        catch (Exception e) {
+            return "-Cannot connect to working directory because: " + e.toString();
         }
     }
 } 
