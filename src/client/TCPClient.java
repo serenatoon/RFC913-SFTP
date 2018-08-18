@@ -6,25 +6,42 @@
 package client;
 import java.io.*; 
 import java.net.*; 
-class TCPClient { 
+class TCPClient {
+
+    private static final String hostAddress = "localhost";
+    private static final int port = 6789;
+
+    private static BufferedReader inFromUser;
+    private static Socket clientSocket;
+    private static DataOutputStream outToServer;
+    private static BufferedReader inFromServer;
     
     public static void main(String argv[]) throws Exception 
     { 
         String sentence; 
-        String modifiedSentence; 
+        String modifiedSentence;
+
 	
-        BufferedReader inFromUser = 
-	    new BufferedReader(new InputStreamReader(System.in)); 
+        inFromUser = new BufferedReader(new InputStreamReader(System.in)); // reads user input
 	
-        Socket clientSocket = new Socket("localhost", 6789);
+        clientSocket = new Socket(hostAddress, port); // connect to socket that server is listening
 	
-        DataOutputStream outToServer = 
-	    new DataOutputStream(clientSocket.getOutputStream()); 
-	
-        
-	BufferedReader inFromServer = 
-	    new BufferedReader(new
-		InputStreamReader(clientSocket.getInputStream())); 
+        outToServer = new DataOutputStream(clientSocket.getOutputStream()); // init DataOutputStream to send msg to server
+
+	    inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream())); // init BufferedReader, reads msg from server
+
+        // connect to server, get initial greeting
+        boolean isConnected = false;
+        String response;
+        while (!isConnected) {
+            System.out.println("trying to connect..........");
+            response = getResponse();
+            System.out.println("Server greeting: " + response);
+            if (response.charAt(0) == '+') {
+                isConnected = true;
+                System.out.println("positive response!");
+            }
+        }
 	
         sentence = inFromUser.readLine(); 
 	
@@ -36,5 +53,37 @@ class TCPClient {
 	
         clientSocket.close(); 
 	
-    } 
+    }
+
+    // helper functions
+
+    /*
+    read msg from server
+    one char at a time
+    return when '\0'
+    */
+    private static String getResponse() {
+        String response = "";
+        int count = 0;
+        char ch = 0;
+
+        while (true) {
+            try {
+                ch = (char) inFromServer.read(); // read in one char at a time, make sure it is a char
+            }
+            catch (IOException e){
+                e.printStackTrace();
+            }
+            // check for null termination or length exceeded
+            if ((ch == '\0') || (count >= Integer.MAX_VALUE)) {
+                break;
+            }
+            else {
+                response += ch;
+                count++;
+            }
+        }
+        return response;
+    }
+
 } 
