@@ -39,7 +39,7 @@ class TCPClient {
             System.out.println("Server greeting: " + response);
             if (response.charAt(0) == '+') {
                 isConnected = true;
-                System.out.println("positive response!");
+                System.out.println("Connection established!");
             }
         }
 
@@ -47,6 +47,7 @@ class TCPClient {
         userInput = inFromUser.readLine().toUpperCase();
         // send user command to server
         sendMessage(userInput);
+        System.out.println(getResponse());
 
 //
 //        outToServer.writeBytes(sentence + '\n');

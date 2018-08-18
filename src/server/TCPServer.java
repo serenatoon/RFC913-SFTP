@@ -14,6 +14,8 @@ class TCPServer {
     private static BufferedReader inFromClient;
     private static DataOutputStream outToClient;
 
+    private static boolean loggedIn = false;
+
     
     public static void main(String argv[]) throws Exception
     { 
@@ -21,7 +23,7 @@ class TCPServer {
 		String capitalizedSentence;
 		String serverResponse = "";
 
-		String greeting = "+localhost SFTP Service"; // "- localhost Out to lunch"
+		String greeting = "+localhost SFTP Service"; // "-localhost Out to lunch"
 
 		// create server socket on port 6789
 		ServerSocket welcomeSocket = new ServerSocket(port);
@@ -51,12 +53,20 @@ class TCPServer {
             String cmd = input[0].toUpperCase();
             System.out.println("input0: " + cmd);
 
+            // DONE COMMAND
             if (cmd.equals("DONE")) {
                 if (input.length == 1) {
                     serverResponse = "+localhost closing connection";
                 }
                 else {
                     serverResponse = "-Too many arguments";
+                }
+            }
+            // USER COMMAND
+            else if (cmd.equals("USER")) {
+                if (input.length == 2) {
+                    // log in
+                    serverResponse = login(input[1]);
                 }
             }
 
@@ -114,6 +124,19 @@ class TCPServer {
             }
         }
         return msg;
+    }
+
+    // log in
+    private static String login(String userid) {
+        String response = "";
+        String id = userid.toUpperCase();
+
+        if (id.equals("GUEST")) { // if guest, don't need pw
+            loggedIn = true;
+            response = "!" + id + " logged in";
+        }
+
+        return response;
     }
 } 
 
