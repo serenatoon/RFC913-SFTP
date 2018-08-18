@@ -21,9 +21,12 @@ class TCPServer {
     private static String jsonPath = System.getProperty("user.dir") + File.separator + "res" + File.separator + "users.json";
 
     private static boolean loggedIn = false;
-    private static String currentUser = "";
-    private static String currentAcc = "";
-    private static String currentPassword = "";
+    private static String currentUser = null;
+    private static String currentAcc = null;
+    private static String currentPassword = null;
+    private static boolean userAccepted = false;
+    private static boolean accAccepted = false;
+    private static boolean passwordAccepted = false;
     
     public static void main(String argv[]) throws Exception
     { 
@@ -89,8 +92,21 @@ class TCPServer {
             // ACCT COMMAND
             else if (cmd.equals("ACCT")) {
                 if (input.length == 2) {
-                    // log in
+                    // check if account is valid
                     serverResponse = tryAcct(input[1]);
+                }
+                else if (input.length < 2) {
+                    serverResponse = "-Too few arguments";
+                }
+                else if (input.length > 2) {
+                    serverResponse = "-Too many arguments";
+                }
+            }
+            // PASS COMMAND
+            else if (cmd.equals("PASS")) {
+                if (input.length == 2) {
+                    // check if pw is correct
+                    serverResponse = checkPassword(input[1]);
                 }
                 else if (input.length < 2) {
                     serverResponse = "-Too few arguments";
@@ -188,8 +204,8 @@ class TCPServer {
                         currentUser = id;
                         currentAcc = jsonUser.getString("acc");
                         currentPassword = jsonUser.getString("pw");
-                        response = "+User-id valid, send account and password";
-                        break;
+                        userAccepted = true;
+                        return "+User-id valid, send account and password";
                     }
                 }
             }
@@ -202,6 +218,7 @@ class TCPServer {
     }
 
     // ACCT command
+    // RFC 913 protocol doesn't explicitly mention that user had to be found first?
     private static String tryAcct(String acct) {
         String response = "";
 
@@ -220,14 +237,16 @@ class TCPServer {
                 jsonUser = users.getJSONObject(i);
                 if (acct.equalsIgnoreCase(jsonUser.getString("acc"))) { // user found in json
                     currentAcc = acct;
+                    currentUser = jsonUser.getString("user");
                     currentPassword = jsonUser.getString("pw");
+                    accAccepted = true;
+                    userAccepted = true; // ?
                     if (loggedIn) {
-                        response = "! Account valid, logged-in";
+                        return "! Account valid, logged-in";
                     }
                     else {
-                        response = "+Account valid, send password";
+                        return "+Account valid, send password";
                     }
-                    break;
                 }
             }
         }
@@ -235,6 +254,23 @@ class TCPServer {
             e.printStackTrace();
         }
         return response;
+    }
+
+    // checks if password is in system
+    private static String checkPassword(String pw) {
+        if (pw.equals(currentPassword)) {
+            if (accAccepted) {
+                loggedIn = true;
+                passwordAccepted = true;
+                return "! Logged in";
+            }
+            else {
+                return "+Send account";
+            }
+        }
+        else {
+            return "-Wrong password, try again";
+        }
     }
 } 
 

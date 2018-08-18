@@ -45,7 +45,7 @@ class TCPClient {
 
          while (true) {
              System.out.println("Enter command...............");
-             userInput = inFromUser.readLine().toUpperCase();
+             userInput = inFromUser.readLine();
              // send user command to server
              sendMessage(userInput);
              response = getResponse();
