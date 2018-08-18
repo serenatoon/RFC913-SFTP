@@ -86,6 +86,19 @@ class TCPServer {
                     serverResponse = "-Too many arguments";
                 }
             }
+            // ACCT COMMAND
+            else if (cmd.equals("ACCT")) {
+                if (input.length == 2) {
+                    // log in
+                    serverResponse = tryAcct(input[1]);
+                }
+                else if (input.length < 2) {
+                    serverResponse = "-Too few arguments";
+                }
+                else if (input.length > 2) {
+                    serverResponse = "-Too many arguments";
+                }
+            }
 
             
             // send response back to client
@@ -166,6 +179,8 @@ class TCPServer {
                 JSONArray users = jsonObject.getJSONArray("users");
                 JSONObject jsonUser;
 
+                // if not found
+                response = "-Invalid user-id, try again";
                 // iterate through userlist
                 for (int i = 0; i < users.length(); i++) {
                     jsonUser = users.getJSONObject(i);
@@ -174,6 +189,7 @@ class TCPServer {
                         currentAcc = jsonUser.getString("acc");
                         currentPassword = jsonUser.getString("pw");
                         response = "+User-id valid, send account and password";
+                        break;
                     }
                 }
             }
@@ -182,6 +198,42 @@ class TCPServer {
             }
         }
 
+        return response;
+    }
+
+    // ACCT command
+    private static String tryAcct(String acct) {
+        String response = "";
+
+        try {
+            // json
+            FileReader reader = new FileReader(jsonPath);
+            JSONParser parser = new JSONParser();
+            Object obj = parser.parse(reader);
+            JSONObject jsonObject = new JSONObject(obj.toString());
+            JSONArray users = jsonObject.getJSONArray("users");
+            JSONObject jsonUser;
+            System.out.println("looking for: " + acct);
+            response = "-Invalid account, try again";
+            // iterate through userlist
+            for (int i = 0; i < users.length(); i++) {
+                jsonUser = users.getJSONObject(i);
+                if (acct.equalsIgnoreCase(jsonUser.getString("acc"))) { // user found in json
+                    currentAcc = acct;
+                    currentPassword = jsonUser.getString("pw");
+                    if (loggedIn) {
+                        response = "! Account valid, logged-in";
+                    }
+                    else {
+                        response = "+Account valid, send password";
+                    }
+                    break;
+                }
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
         return response;
     }
 } 
