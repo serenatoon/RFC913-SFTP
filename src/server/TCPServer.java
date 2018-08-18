@@ -7,6 +7,11 @@ package server;
 
 import java.io.*;
 import java.net.*;
+import java.nio.file.Files;
+import java.nio.file.attribute.FileOwnerAttributeView;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -204,6 +209,9 @@ class TCPServer {
                             serverResponse = "-Invalid LIST query";
                             break;
                     }
+                }
+                else {
+                    serverResponse = "-listPath is null??";
                 }
             }
 
@@ -404,9 +412,11 @@ class TCPServer {
     // get formatted directory listing
     private static String getFormattedListing(String path) {
         String response = "";
+        System.out.println("path: " + path);
         try {
             File dir = new File(path);
             response += "+" + path + System.getProperty("line.separator"); // first response is current dir
+            System.out.println(response);
             File[] fileList = dir.listFiles();
             for (int i =0; i < fileList.length; i++) {
                 if (fileList[i].isFile()) {
@@ -422,7 +432,35 @@ class TCPServer {
 
     // get vecbose directory listing
     private static String getVerboseListing(String path) {
-        return "TODO";
+        String response = "";
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy kk:mm");
+        try {
+            File dir = new File(path);
+            response += "+" + path + System.getProperty("line.separator"); // first response is current dir
+            System.out.println(response);
+            File[] fileList = dir.listFiles();
+            for (int i =0; i < fileList.length; i++) {
+                if (fileList[i].isFile()) {
+                    long lastModified = fileList[i].lastModified();
+                    String dateModified = dateFormat.format(new Date(lastModified));
+                    String filesize = String.valueOf(fileList[i].length());
+                    String owner = null;
+                    // get file owner
+                    try {
+                        FileOwnerAttributeView attribute = Files.getFileAttributeView(fileList[i].toPath(), FileOwnerAttributeView.class);
+                        owner = attribute.getOwner().getName();
+                    }
+                    catch (IOException e) {
+                        e.printStackTrace();;
+                    }
+                    response += fileList[i].getName() + "    " + dateModified + "    " + filesize + "    " + owner + System.getProperty("line.separator");
+                }
+            }
+            return response + '\0';
+        }
+        catch (Exception e) {
+            return "-Could not get formatted listing because: " + e.toString();
+        }
     }
 
     // check dir exists

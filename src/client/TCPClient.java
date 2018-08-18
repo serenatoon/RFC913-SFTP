@@ -49,7 +49,7 @@ class TCPClient {
              // send user command to server
              sendMessage(userInput);
              response = getResponse();
-             System.out.println(response);
+             System.out.println("Server response: " + response);
 
              if (userInput.equals("DONE") && response.charAt(0) == '+') {
                  break;
