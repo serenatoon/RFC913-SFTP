@@ -14,8 +14,10 @@ class TCPServer {
     private static BufferedReader inFromClient;
     private static DataOutputStream outToClient;
 
-    private static boolean loggedIn = false;
+    private static String jsonPath = System.getProperty("user.dir") + File.separator + "res" + "users.json";
 
+    private static boolean loggedIn = false;
+    private static String currentUser = "";
     
     public static void main(String argv[]) throws Exception
     { 
@@ -57,6 +59,9 @@ class TCPServer {
             if (cmd.equals("DONE")) {
                 if (input.length == 1) {
                     serverResponse = "+localhost closing connection";
+                    System.out.println("Connection closed!");
+                    sendResponse(serverResponse);
+                    return;
                 }
                 else {
                     serverResponse = "-Too many arguments";
@@ -67,6 +72,12 @@ class TCPServer {
                 if (input.length == 2) {
                     // log in
                     serverResponse = login(input[1]);
+                }
+                else if (input.length < 2) {
+                    serverResponse = "-Too few arguments";
+                }
+                else if (input.length > 2) {
+                    serverResponse = "-Too many arguments";
                 }
             }
 
@@ -92,7 +103,7 @@ class TCPServer {
                 connectionSocket.close();
             }
             catch (IOException e2) {
-
+                // do nothing
             }
         }
     }
@@ -131,7 +142,10 @@ class TCPServer {
         String response = "";
         String id = userid.toUpperCase();
 
-        if (id.equals("GUEST")) { // if guest, don't need pw
+        if (loggedIn && id.equals(currentUser)) {
+            response = "!" + id + " Already logged in";
+        }
+        else if (id.equals("ADMIN")) { // if admin, don't need pw
             loggedIn = true;
             response = "!" + id + " logged in";
         }

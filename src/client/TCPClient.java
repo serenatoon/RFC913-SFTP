@@ -43,12 +43,17 @@ class TCPClient {
             }
         }
 
-        System.out.println("Enter command...............");
-        userInput = inFromUser.readLine().toUpperCase();
-        // send user command to server
-        sendMessage(userInput);
-        System.out.println(getResponse());
+         while (true) {
+             System.out.println("Enter command...............");
+             userInput = inFromUser.readLine().toUpperCase();
+             // send user command to server
+             sendMessage(userInput);
+             response = getResponse();
 
+             if (userInput.equals("DONE") && response.charAt(0) == '+') {
+                 break;
+             }
+         }
 //
 //        outToServer.writeBytes(sentence + '\n');
 //
@@ -56,7 +61,8 @@ class TCPClient {
 //
 //        System.out.println("FROM SERVER: " + modifiedSentence);
 	
-        clientSocket.close(); 
+        clientSocket.close();
+        System.out.println("Connection closed!");
 	
     }
 
