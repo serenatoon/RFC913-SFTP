@@ -27,6 +27,7 @@ class TCPServer {
     private static String serverDir = System.getProperty("user.dir") + File.separator + "res" + File.separator + "server";
     private static String currentDir = serverDir + File.separator;
     private static String cdirSaved = null;
+    private static String toRename = null;
 
     private static boolean loggedIn = false;
     private static String currentUser = null;
@@ -212,6 +213,17 @@ class TCPServer {
                 }
                 else {
                     serverResponse = "-listPath is null??";
+                }
+            }
+            // NAME command
+            else if (cmd.equals("NAME")) {
+                String path = currentDir + File.separator + input[1];
+                if (dirExists(path)) {
+                    serverResponse = "+File exists";
+                    toRename = path;
+                }
+                else {
+                    serverResponse = "-Can't find " + input[1];
                 }
             }
 
