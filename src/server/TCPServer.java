@@ -166,6 +166,36 @@ class TCPServer {
                     serverResponse = changeDir(input[1]);
                 }
             }
+            // LIST command
+            else if (cmd.equals("LIST")) {
+                String listPath = null;
+                if (input.length == 2) {
+                    listPath = currentDir;
+                }
+                else if (input.length == 3) {
+                    listPath = input[2];
+                }
+                else if (input.length < 2) {
+                    serverResponse = "-Too few arguments";
+                }
+                else if (input.length > 3) {
+                    serverResponse = "-Too many arguments";
+                }
+
+                if (listPath != null) {
+                    switch (input[1].toUpperCase()) {
+                        case "F":
+                            serverResponse = getFormattedListing(listPath);
+                            break;
+                        case "V":
+                            serverResponse = getVerboseListing(listPath);
+                            break;
+                        default:
+                            serverResponse = "-Invalid LIST query";
+                            break;
+                    }
+                }
+            }
 
             
             // send response back to client
@@ -359,6 +389,30 @@ class TCPServer {
         catch (Exception e) {
             return "-Cannot connect to working directory because: " + e.toString();
         }
+    }
+
+    // get formatted directory listing
+    private static String getFormattedListing(String path) {
+        String response = "";
+        try {
+            File dir = new File(path);
+            response += "+" + path + System.getProperty("line.separator"); // first response is current dir
+            File[] fileList = dir.listFiles();
+            for (int i =0; i < fileList.length; i++) {
+                if (fileList[i].isFile()) {
+                    response += fileList[i].getName() + System.getProperty("line.separator");
+                }
+            }
+            return response + '\0';
+        }
+        catch (Exception e) {
+            return "-Could not get formatted listing because: " + e.toString();
+        }
+    }
+
+    // get vecbose directory listing
+    private static String getVerboseListing(String path) {
+        return "do things";
     }
 } 
 
