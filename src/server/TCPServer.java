@@ -293,7 +293,12 @@ class TCPServer {
                     accAccepted = true;
                     userAccepted = true; // ?
                     if (loggedIn) {
-                        return "! Account valid, logged-in";
+                        if (cdirSaved == null) { // check that we didn't try execute cdir before
+                            return "! Account valid, logged-in";
+                        }
+                        else {
+                            return changeDir(cdirSaved);
+                        }
                     }
                     else {
                         return "+Account valid, send password";
@@ -311,9 +316,16 @@ class TCPServer {
     private static String checkPassword(String pw) {
         if (pw.equals(currentPassword)) {
             if (accAccepted) {
-                loggedIn = true;
-                passwordAccepted = true;
-                return "! Logged in";
+                if (cdirSaved == null) { // check that we didn't try to run cdir command before we were logged in
+                    loggedIn = true;
+                    passwordAccepted = true;
+                    return "! Logged in";
+                }
+                else { // execute cdir
+                    loggedIn = true;
+                    passwordAccepted = true;
+                    return changeDir(cdirSaved);
+                }
             }
             else {
                 return "+Send account";
