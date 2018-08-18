@@ -27,6 +27,8 @@ class TCPServer {
     private static boolean userAccepted = false;
     private static boolean accAccepted = false;
     private static boolean passwordAccepted = false;
+
+    private static char type = 0;
     
     public static void main(String argv[]) throws Exception
     { 
@@ -113,6 +115,40 @@ class TCPServer {
                 }
                 else if (input.length > 2) {
                     serverResponse = "-Too many arguments";
+                }
+            }
+            // TYPE command
+            else if (cmd.equals("TYPE")) {
+                if (!loggedIn) {
+                    serverResponse = "-Not logged in";
+                }
+                else {
+                    if (input.length == 2) {
+                        switch (input[1].toUpperCase()) {
+                            case "A":
+                                serverResponse = "+Using ASCII mode";
+                                type = 'A';
+                                break;
+                            case "B":
+                                serverResponse = "+Using Binary mode";
+                                type = 'B';
+                                break;
+                            case "C":
+                                serverResponse = "+Using Continuous mode";
+                                type = 'C';
+                                break;
+                            default:
+                                serverResponse = "-Type not valid";
+                                type = 0;
+                                break;
+                        }
+                    }
+                    else if (input.length < 2) {
+                        serverResponse = "-Too few arguments";
+                    }
+                    else if (input.length > 2) {
+                        serverResponse = "-Too many arguments";
+                    }
                 }
             }
 
