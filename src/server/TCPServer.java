@@ -147,6 +147,7 @@ class TCPServer {
         }
         else if (id.equals("ADMIN")) { // if admin, don't need pw
             loggedIn = true;
+            currentUser = id;
             response = "!" + id + " logged in";
         }
 
