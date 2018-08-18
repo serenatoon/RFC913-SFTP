@@ -18,7 +18,7 @@ class TCPClient {
     
     public static void main(String argv[]) throws Exception 
     { 
-        String sentence; 
+        String userInput;
         String modifiedSentence;
 
 	
@@ -42,14 +42,18 @@ class TCPClient {
                 System.out.println("positive response!");
             }
         }
-	
-        sentence = inFromUser.readLine(); 
-	
-        outToServer.writeBytes(sentence + '\n'); 
-	
-        modifiedSentence = inFromServer.readLine(); 
-	
-        System.out.println("FROM SERVER: " + modifiedSentence); 
+
+        System.out.println("Enter command...............");
+        userInput = inFromUser.readLine().toUpperCase();
+        // send user command to server
+        sendMessage(userInput);
+
+//
+//        outToServer.writeBytes(sentence + '\n');
+//
+//        modifiedSentence = inFromServer.readLine();
+//
+//        System.out.println("FROM SERVER: " + modifiedSentence);
 	
         clientSocket.close(); 
 	
@@ -86,4 +90,18 @@ class TCPClient {
         return response;
     }
 
+    // send command to server
+    // append null terminator
+    private static void sendMessage(String msg) {
+        try {
+            outToServer.writeBytes(msg + "\0");
+        }
+        catch (IOException e) { // socket closed
+            try {
+                clientSocket.close(); // close this one too
+            } catch (IOException e2) {
+                // do nothing
+            }
+        }
+    }
 } 
