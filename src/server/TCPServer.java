@@ -4,8 +4,12 @@
  * All Rights Reserved.
  **/
 package server;
-import java.io.*; 
-import java.net.*; 
+
+import java.io.*;
+import java.net.*;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 class TCPServer {
 	private static final int port = 6789;
@@ -14,10 +18,12 @@ class TCPServer {
     private static BufferedReader inFromClient;
     private static DataOutputStream outToClient;
 
-    private static String jsonPath = System.getProperty("user.dir") + File.separator + "res" + "users.json";
+    private static String jsonPath = System.getProperty("user.dir") + File.separator + "res" + File.separator + "users.json";
 
     private static boolean loggedIn = false;
     private static String currentUser = "";
+    private static String currentAcc = "";
+    private static String currentPassword = "";
     
     public static void main(String argv[]) throws Exception
     { 
@@ -143,12 +149,37 @@ class TCPServer {
         String id = userid.toUpperCase();
 
         if (loggedIn && id.equals(currentUser)) {
-            response = "!" + id + " Already logged in";
+            response = "!" + id + " already logged in";
         }
         else if (id.equals("ADMIN")) { // if admin, don't need pw
             loggedIn = true;
             currentUser = id;
             response = "!" + id + " logged in";
+        }
+        else {
+            try {
+                // json
+                FileReader reader = new FileReader(jsonPath);
+                JSONParser parser = new JSONParser();
+                Object obj = parser.parse(reader);
+                JSONObject jsonObject = new JSONObject(obj.toString());
+                JSONArray users = jsonObject.getJSONArray("users");
+                JSONObject jsonUser;
+
+                // iterate through userlist
+                for (int i = 0; i < users.length(); i++) {
+                    jsonUser = users.getJSONObject(i);
+                    if (id.equals(jsonUser.getString("user").toUpperCase())) { // user found in json
+                        currentUser = id;
+                        currentAcc = jsonUser.getString("acc");
+                        currentPassword = jsonUser.getString("pw");
+                        response = "+User-id valid, send account and password";
+                    }
+                }
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         return response;

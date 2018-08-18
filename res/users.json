@@ -1,0 +1,18 @@
+{
+	"users": [{
+			"user": "sere",
+			"acc": "s",
+			"pw": "sss"
+		},
+		{
+			"user": "wannachai",
+			"acc": "is",
+			"pw": "gay"
+		},
+		{
+			"user": "test",
+			"acc": "test",
+			"pw": "test"
+		}
+	]
+}
