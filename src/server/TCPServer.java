@@ -490,8 +490,15 @@ class TCPServer {
         File fileToRename = new File(toRenamePath);
         File newFile = new File(currentDir + File.separator + newFileName);
         try {
-            fileToRename.renameTo(newFile);
-            return "+" + toRenameFilename + " renamed to " + newFileName;
+            if (fileToRename.renameTo(newFile)) {
+                String response = "+" + toRenameFilename + " renamed to " + newFileName;
+                toRenameFilename = null;
+                toRenamePath = null;
+                return response;
+            }
+            else {
+                return "-File could not be renamed!";
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
