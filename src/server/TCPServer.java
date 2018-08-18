@@ -173,7 +173,7 @@ class TCPServer {
                     listPath = currentDir;
                 }
                 else if (input.length == 3) {
-                    listPath = input[2];
+                    listPath = currentDir + File.separator + input[2];
                 }
                 else if (input.length < 2) {
                     serverResponse = "-Too few arguments";
@@ -185,10 +185,20 @@ class TCPServer {
                 if (listPath != null) {
                     switch (input[1].toUpperCase()) {
                         case "F":
-                            serverResponse = getFormattedListing(listPath);
+                            if (dirExists(listPath)) {
+                                serverResponse = getFormattedListing(listPath);
+                            }
+                            else {
+                                serverResponse = "-Could not get directory listing because directory does not exist";
+                            }
                             break;
                         case "V":
-                            serverResponse = getVerboseListing(listPath);
+                            if (dirExists(listPath)) {
+                                serverResponse = getVerboseListing(listPath);
+                            }
+                            else {
+                                serverResponse = "-Could not get directory listing because directory does not exist";
+                            }
                             break;
                         default:
                             serverResponse = "-Invalid LIST query";
@@ -412,7 +422,16 @@ class TCPServer {
 
     // get vecbose directory listing
     private static String getVerboseListing(String path) {
-        return "do things";
+        return "TODO";
+    }
+
+    // check dir exists
+    private static boolean dirExists(String dir){
+        String path = dir;
+        if (new File(path).exists()) {
+            return true;
+        }
+        else { return false; }
     }
 } 
 
