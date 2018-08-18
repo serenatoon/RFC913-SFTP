@@ -27,7 +27,8 @@ class TCPServer {
     private static String serverDir = System.getProperty("user.dir") + File.separator + "res" + File.separator + "server";
     private static String currentDir = serverDir + File.separator;
     private static String cdirSaved = null;
-    private static String toRename = null;
+    private static String toRenamePath = null;
+    private static String toRenameFilename = null;
 
     private static boolean loggedIn = false;
     private static String currentUser = null;
@@ -220,10 +221,20 @@ class TCPServer {
                 String path = currentDir + File.separator + input[1];
                 if (dirExists(path)) {
                     serverResponse = "+File exists";
-                    toRename = path;
+                    toRenamePath = path;
+                    toRenameFilename = input[1];
                 }
                 else {
                     serverResponse = "-Can't find " + input[1];
+                }
+            }
+            // TOBE command
+            else if (cmd.equals("TOBE")) {
+                if (toRenamePath == null) {
+                    serverResponse = "-File wasn't renamed because you never issued NAME command";
+                }
+                else {
+                    serverResponse = renameFile(input[1]);
                 }
             }
 
@@ -472,6 +483,19 @@ class TCPServer {
         }
         catch (Exception e) {
             return "-Could not get formatted listing because: " + e.toString();
+        }
+    }
+
+    private static String renameFile(String newFileName) {
+        File fileToRename = new File(toRenamePath);
+        File newFile = new File(currentDir + File.separator + newFileName);
+        try {
+            fileToRename.renameTo(newFile);
+            return "+" + toRenameFilename + " renamed to " + newFileName;
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return "-File wasn't renamed because " + e.toString();
         }
     }
 
