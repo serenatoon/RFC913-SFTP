@@ -47,7 +47,7 @@ class TCPClient {
             }
         }
 
-         while (true) {
+         while (isConnected) {
              System.out.println("Enter command...............");
              userInput = inFromUser.readLine();
              String[] input = userInput.split(" "); // split input
@@ -72,6 +72,9 @@ class TCPClient {
                              System.out.println("Server response: " + response);
                          }
                      }
+                     else if (response.charAt(0) == '-') {
+                         isConnected = false;
+                     }
                      break;
                  case "RETR":
                      sendMessage(userInput);
@@ -89,6 +92,9 @@ class TCPClient {
                              sendMessage("STOP");
                          }
                      }
+                     else {
+                         isConnected = false;
+                     }
                      break;
                  default:
                      // send user command to server
@@ -97,7 +103,10 @@ class TCPClient {
                      System.out.println("Server response: " + response);
                      // if closing connection
                      if (userInput.equals("DONE") && response.charAt(0) == '+') {
-                         clientSocket.close();
+                         isConnected = false;
+                     }
+                     else if (response.charAt(0) == '-') {
+                         isConnected = false;
                      }
                      break;
              }
@@ -109,8 +118,8 @@ class TCPClient {
 //
 //        System.out.println("FROM SERVER: " + modifiedSentence);
 	
-        //clientSocket.close();
-        //System.out.println("Connection closed!");
+        clientSocket.close();
+        System.out.println("Connection closed!");
 	
     }
 

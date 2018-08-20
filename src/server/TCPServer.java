@@ -50,7 +50,6 @@ class TCPServer {
     public static void main(String argv[]) throws Exception
     { 
 		String clientInput;
-		String capitalizedSentence;
 		String serverResponse = "";
 
 		String greeting = "+localhost SFTP Service"; // "-localhost Out to lunch"
@@ -70,7 +69,6 @@ class TCPServer {
         sendResponse(greeting);
 
 		while(true) {
-
             // stop if connection closed
             if (connectionSocket.isClosed()) {
                 System.out.println("Connection closed!");
