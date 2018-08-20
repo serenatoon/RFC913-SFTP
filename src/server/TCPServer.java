@@ -31,6 +31,9 @@ class TCPServer {
     private static String toRenameFilename = null;
     private static boolean isRetrieving = false;
     private static String toRetrieve = null;
+    private static String toStore = null;
+    private static String storeMode = null;
+    private static boolean isStoring = false;
 
     private static boolean loggedIn = false;
     private static String currentUser = null;
@@ -264,29 +267,70 @@ class TCPServer {
             // STOR command
             else if (cmd.equals("STOR")) {
                 String path = currentDir + input[2];
-                switch (input[1].toUpperCase()) {
-                    case "NEW":
-                        if (dirExists(path)) {
-                            serverResponse = "-File exists, but system doesn't support generations";
-                        }
-                        else {
-                            serverResponse = "File does not exist, will create new file";
-                        }
-                        break;
-                    case "OLD":
-                        if (dirExists(path)) {
-                            serverResponse = "+Will write over old file";
-                        }
-                        else {
-                            serverResponse = "+Will create new file";
-                        }
-                    case "APP":
-                        if (dirExists(path)) {
-                            serverResponse = "+Will append to file";
-                        }
-                        else {
-                            serverResponse = "+Will create file";
-                        }
+                String mode = input[1].toUpperCase();
+                boolean isValidMode = false;
+                if (input.length == 3) {
+                    switch (mode) {
+                        case "NEW":
+                            if (dirExists(path)) {
+                                serverResponse = "-File exists, but system doesn't support generations";
+                            } else {
+                                serverResponse = "File does not exist, will create new file";
+                            }
+                            isValidMode = true;
+                            break;
+                        case "OLD":
+                            if (dirExists(path)) {
+                                serverResponse = "+Will write over old file";
+                            } else {
+                                serverResponse = "+Will create new file";
+                            }
+                            isValidMode = true;
+                            break;
+                        case "APP":
+                            if (dirExists(path)) {
+                                serverResponse = "+Will append to file";
+                            } else {
+                                serverResponse = "+Will create file";
+                            }
+                            isValidMode = true;
+                            break;
+                        default:
+                            serverResponse = "-Invalid use of STOR command";
+                            isValidMode = false;
+                            break;
+                    }
+
+                    // assign global path and mode; prepare for future commands
+                    if (isValidMode) {
+                        toStore = path;
+                        storeMode = mode;
+                    } else {
+                        toStore = null;
+                        storeMode = null;
+                    }
+                }
+                else {
+                    serverResponse = "-Invalid use of STOR command";
+                }
+            }
+            // SIZE command
+            else if (cmd.equals("SIZE")) {
+                try {
+                    long filesize = Long.parseLong(input[1]); // might throw NumberFormatException if too big
+
+                    if (hasEnoughDiskSpace(filesize)) {
+                        serverResponse = "+ok, waiting for file";
+                        isStoring = true;
+                    }
+                    else {
+                        serverResponse = "-Not enough room, don't send it";
+                        isStoring = false;
+                    }
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                    serverResponse = "-Not enough room, don't send it";
                 }
             }
             
@@ -596,6 +640,20 @@ class TCPServer {
     private static long getFileSize(String dir) {
         String path = dir;
         return new File(dir).length();
+    }
+
+    // checks whether or not there is enough room for the file on disk
+    private static boolean hasEnoughDiskSpace(long filesize) {
+        File currDir = new File(currentDir);
+        try {
+            long space = Files.getFileStore(currDir.toPath().toRealPath()).getUsableSpace();
+            System.out.println("Free space: " + space);
+            return (space > filesize);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
 }
