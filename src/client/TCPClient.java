@@ -5,7 +5,9 @@
  **/
 package client;
 import java.io.*; 
-import java.net.*; 
+import java.net.*;
+import java.nio.file.Files;
+
 class TCPClient {
 
     private static final String hostAddress = "localhost";
@@ -71,6 +73,23 @@ class TCPClient {
                          }
                      }
                      break;
+                 case "RETR":
+                     sendMessage(userInput);
+                     response = getResponse();
+                     System.out.println("Response: " + response);
+
+                     // if positive response, send SEND or STOP
+                     if (response.charAt(0) != '-') {
+                         if (hasEnoughDiskSpace(Long.parseLong(response))) {
+                             sendMessage("SEND");
+                             receiveFile(input[1]);
+                             response = getResponse();
+                             System.out.println("Server response: " + response);
+                         }
+                         else {
+                             sendMessage("STOP");
+                         }
+                     }
                  default:
                      // send user command to server
                      sendMessage(userInput);
@@ -159,6 +178,38 @@ class TCPClient {
         }
         catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    // receive file
+    private static void receiveFile(String filename) {
+        File file = new File(currentDir + filename);
+        try {
+            FileOutputStream filestream = new FileOutputStream(file, false);
+            BufferedOutputStream buf = new BufferedOutputStream(filestream);
+
+            for (int i = 0; i < file.length(); i++) {
+                buf.write(inFromServer.read());
+            }
+            buf.close();
+            filestream.close();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // checks whether or not there is enough room for the file on disk
+    private static boolean hasEnoughDiskSpace(long filesize) {
+        File currDir = new File(currentDir);
+        try {
+            long space = Files.getFileStore(currDir.toPath().toRealPath()).getUsableSpace();
+            System.out.println("Free space: " + space);
+            return (space > filesize);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
     }
 } 
