@@ -463,7 +463,7 @@ class TCPServer {
     private static String tryAcct(String acct) {
         String response = "";
 
-        if (!acct.equalsIgnoreCase("ADMIN")) {
+        if (!acct.equalsIgnoreCase("ADMIN") && !passwordAccepted) {
             try {
                 // json
                 FileReader reader = new FileReader(jsonPath);
@@ -497,7 +497,7 @@ class TCPServer {
                 e.printStackTrace();
             }
         }
-        else {
+        else if (acct.equalsIgnoreCase("ADMIN")) {
             currentAcc = acct;
             currentUser = "ADMIN";
             accAccepted = true;
@@ -508,12 +508,21 @@ class TCPServer {
                 return changeDir(cdirSaved);
             }
         }
+        else if (passwordAccepted) {
+            if (acct.equals(currentAcc)) {
+                loggedIn = true;
+                return "! Account valid, logged-in";
+            }
+            else {
+                return "-Invalid account, try again";
+            }
+        }
         return response;
     }
 
     // checks if password is in system
     private static String checkPassword(String pw) {
-        if (pw.equals(currentPassword)) {
+        if (pw.equals(currentPassword) && accAccepted) {
             if (accAccepted) {
                 if (cdirSaved == null) { // check that we didn't try to run cdir command before we were logged in
                     loggedIn = true;
@@ -530,9 +539,42 @@ class TCPServer {
                 return "+Send account";
             }
         }
-        else {
-            return "-Wrong password, try again";
+        else if (!accAccepted) {
+            try {
+                // json
+                FileReader reader = new FileReader(jsonPath);
+                JSONParser parser = new JSONParser();
+                Object obj = parser.parse(reader);
+                JSONObject jsonObject = new JSONObject(obj.toString());
+                JSONArray users = jsonObject.getJSONArray("users");
+                JSONObject jsonUser;
+                System.out.println("looking for: " + pw);
+                String response = "-Invalid account, try again";
+                // iterate through userlist
+                for (int i = 0; i < users.length(); i++) {
+                    jsonUser = users.getJSONObject(i);
+                    if (pw.equalsIgnoreCase(jsonUser.getString("pw"))) { // user found in json
+                        currentAcc = jsonUser.getString("acc");
+                        currentUser = jsonUser.getString("user");
+                        currentPassword = jsonUser.getString("pw");
+                        passwordAccepted = true;
+                        if (loggedIn) {
+                            if (cdirSaved == null) { // check that we didn't try execute cdir before
+                                return "! Password valid, logged-in";
+                            } else {
+                                return changeDir(cdirSaved);
+                            }
+                        } else {
+                            return "+Password valid, send account";
+                        }
+                    }
+                }
+                return response;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
+        return "-Invalid account, try again";
     }
 
     // CDIR command

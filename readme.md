@@ -20,6 +20,7 @@
 - Runs on `localhost`; port `6789`.
 - Examples show user input prefixed with `$`.  This is for display purposes and should not be included in your input.
 - 'Current directory' refers to the currently-assigned directory.  Before a `CDIR` command is run, this refers to `res/server/` on the server side, and `res/client/` on the client side.
+- When a directory/file is specified, it should be relative to the 'current directory'.
 
 ### Logging in
 There are currently 3 accounts for testing, stored in `res/users.json`:
@@ -156,4 +157,48 @@ retr_test.txt
 ```
 
 Example of `LIST V`:
+```
+$ LIST V
++E:\Documents\cs725_a1\res\server\
+client.txt    20/08/2018 20:34    1    BUILTIN\Administrators
+retr_test.txt    20/08/2018 20:20    8    BUILTIN\Administrators
+```
 
+Example of `LIST F`, specifying directory `test`:
+```
+$ LIST F test
++E:\Documents\cs725_a1\res\server\test
+a.txt
+sdfsdf.txt
+```
+
+Example of invalid `directory`:
+```
+$ LIST F invalid
+-Could not get directory listing because directory does not exist
+```
+
+### `CDIR` `new-directory`
+
+Changes current working directory/"current directory" to `new-directory` if already logged in.
+If not logged in, this command will be 'queued' -- the directory will be changed once logged in.
+
+Example of not logged in:
+```
+$ CDIR test
++directory ok, send account/password
+ACCT admin
+!Changed working dir to test
+```
+
+Example of logged in:
+```
+$ CDIR test2
+!Changed working dir to test2
+```
+
+Example of non-existent directory:
+```
+$ CDIR a
+-Can't connect to working directory because: Directory does not exist
+```
