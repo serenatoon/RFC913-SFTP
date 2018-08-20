@@ -15,6 +15,8 @@ class TCPClient {
     private static Socket clientSocket;
     private static DataOutputStream outToServer;
     private static BufferedReader inFromServer;
+
+    private static String currentDir = System.getProperty("user.dir") + File.separator + "res" + File.separator + "client" + File.separator;
     
     public static void main(String argv[]) throws Exception 
     { 
@@ -46,13 +48,37 @@ class TCPClient {
          while (true) {
              System.out.println("Enter command...............");
              userInput = inFromUser.readLine();
-             // send user command to server
-             sendMessage(userInput);
-             response = getResponse();
-             System.out.println("Server response: " + response);
+             String[] input = userInput.split(" "); // split input
+             String cmd = input[0].toUpperCase();
 
-             if (userInput.equals("DONE") && response.charAt(0) == '+') {
-                 break;
+             // commands that need client-side logic
+             switch (cmd) {
+                 case "STOR":
+                     sendMessage(userInput);
+                     response = getResponse();
+                     System.out.println("Response: " + response);
+
+                     // if positive response, send SIZE command
+                     if (response.charAt(0) == '+') {
+                         File fileToSend = new File(currentDir + input[2]);
+                         sendMessage("SIZE " + fileToSend.length());
+                         response = getResponse();
+                         System.out.println("response: " + response);
+                         if (response.charAt(0) == '+') {
+                             sendFile(fileToSend);
+                         }
+                     }
+                     break;
+                 default:
+                     // send user command to server
+                     sendMessage(userInput);
+                     response = getResponse();
+                     System.out.println("Server response: " + response);
+                     // if closing connection
+                     if (userInput.equals("DONE") && response.charAt(0) == '+') {
+                         clientSocket.close();
+                     }
+                     break;
              }
          }
 //
@@ -62,8 +88,8 @@ class TCPClient {
 //
 //        System.out.println("FROM SERVER: " + modifiedSentence);
 	
-        clientSocket.close();
-        System.out.println("Connection closed!");
+        //clientSocket.close();
+        //System.out.println("Connection closed!");
 	
     }
 
@@ -110,6 +136,27 @@ class TCPClient {
             } catch (IOException e2) {
                 // do nothing
             }
+        }
+    }
+
+    // send file
+    private static void sendFile(File file) {
+        byte[] bytestream = new byte[(int) file.length()];
+
+        try {
+            FileInputStream filestream = new FileInputStream(file);
+            BufferedInputStream buf = new BufferedInputStream(filestream);
+
+            int data = 0;
+            while ((data = buf.read(bytestream)) >= 0) {
+                outToServer.write(bytestream, 0, data);
+            }
+            buf.close();
+            filestream.close();
+            outToServer.flush();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
         }
     }
 } 

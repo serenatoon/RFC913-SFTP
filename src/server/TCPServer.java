@@ -34,6 +34,9 @@ class TCPServer {
     private static String toStore = null;
     private static String storeMode = null;
     private static boolean isStoring = false;
+    private static boolean overwrite = false;
+    private static long storeSize = 0;
+    private static String toStoreFilename = null;
 
     private static boolean loggedIn = false;
     private static String currentUser = null;
@@ -275,13 +278,14 @@ class TCPServer {
                             if (dirExists(path)) {
                                 serverResponse = "-File exists, but system doesn't support generations";
                             } else {
-                                serverResponse = "File does not exist, will create new file";
+                                serverResponse = "+File does not exist, will create new file";
                             }
                             isValidMode = true;
                             break;
                         case "OLD":
                             if (dirExists(path)) {
                                 serverResponse = "+Will write over old file";
+                                overwrite = true;
                             } else {
                                 serverResponse = "+Will create new file";
                             }
@@ -304,10 +308,9 @@ class TCPServer {
                     // assign global path and mode; prepare for future commands
                     if (isValidMode) {
                         toStore = path;
-                        storeMode = mode;
+                        toStoreFilename = input[2];
                     } else {
                         toStore = null;
-                        storeMode = null;
                     }
                 }
                 else {
@@ -320,17 +323,24 @@ class TCPServer {
                     long filesize = Long.parseLong(input[1]); // might throw NumberFormatException if too big
 
                     if (hasEnoughDiskSpace(filesize)) {
-                        serverResponse = "+ok, waiting for file";
+                        System.out.println("Enough space");
                         isStoring = true;
+                        storeSize = filesize;
+                        sendResponse("+ok, waiting for file");
+                        System.out.println("Storing file....");
+                        serverResponse = storeFile();
                     }
                     else {
+                        System.out.println("Not enough space");
                         serverResponse = "-Not enough room, don't send it";
                         isStoring = false;
+                        storeSize = 0;
                     }
                 }
                 catch (Exception e) {
                     e.printStackTrace();
                     serverResponse = "-Not enough room, don't send it";
+                    storeSize = 0;
                 }
             }
             
@@ -608,7 +618,7 @@ class TCPServer {
 
         try {
             FileInputStream filestream = new FileInputStream(file);
-            BufferedInputStream buf = new BufferedInputStream(new FileInputStream(file));
+            BufferedInputStream buf = new BufferedInputStream(filestream);
 
             int data = 0;
             // read file, as long as there is data, send it
@@ -624,6 +634,27 @@ class TCPServer {
         catch (Exception e) {
             e.printStackTrace();
             return false;
+        }
+    }
+
+    // store file
+    private static String storeFile() {
+        System.out.println("Storing file at: " + toStore);
+        try {
+            FileOutputStream filestream = new FileOutputStream(toStore, overwrite);
+            BufferedOutputStream buf = new BufferedOutputStream(filestream);
+
+            for (int i = 0; i < storeSize; i++) {
+                buf.write(inFromClient.read()); // read bytes from client
+            }
+            buf.close();
+            filestream.close();
+
+            return "+Saved " + toStoreFilename;
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return "-Couldn't save because " + e.toString();
         }
     }
 
