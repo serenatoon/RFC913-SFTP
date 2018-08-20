@@ -343,6 +343,15 @@ class TCPServer {
                     storeSize = 0;
                 }
             }
+            // KILL command
+            else if (cmd.equals("KILL")) {
+                if (input.length == 2) {
+                    serverResponse = deleteFile(input[1]);
+                }
+                else {
+                    serverResponse = "-Invalid use of KILL command";
+                }
+            }
             
             // send response back to client
             sendResponse(serverResponse);
@@ -656,6 +665,17 @@ class TCPServer {
         catch (Exception e) {
             e.printStackTrace();
             return "-Couldn't save because " + e.toString();
+        }
+    }
+
+    // deletes file
+    private static String deleteFile(String dir) {
+        File file = new File(currentDir + dir);
+        if (file.delete()) {
+            return "+" + dir + " deleted";
+        }
+        else {
+            return "-File could not be deleted";
         }
     }
 
