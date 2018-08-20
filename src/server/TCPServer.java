@@ -24,11 +24,12 @@ class TCPServer {
     private static DataOutputStream outToClient;
 
     private static String jsonPath = System.getProperty("user.dir") + File.separator + "res" + File.separator + "users.json";
-    private static String serverDir = System.getProperty("user.dir") + File.separator + "res" + File.separator + "server";
-    private static String currentDir = serverDir + File.separator;
+    private static String serverDir = System.getProperty("user.dir") + File.separator + "res" + File.separator + "server" + File.separator;
+    private static String currentDir = serverDir;
     private static String cdirSaved = null;
     private static String toRenamePath = null;
     private static String toRenameFilename = null;
+    private static boolean isRetrieving = false;
 
     private static boolean loggedIn = false;
     private static String currentUser = null;
@@ -180,7 +181,7 @@ class TCPServer {
                     listPath = currentDir;
                 }
                 else if (input.length == 3) {
-                    listPath = currentDir + File.separator + input[2];
+                    listPath = currentDir + input[2];
                 }
                 else if (input.length < 2) {
                     serverResponse = "-Too few arguments";
@@ -218,7 +219,7 @@ class TCPServer {
             }
             // NAME command
             else if (cmd.equals("NAME")) {
-                String path = currentDir + File.separator + input[1];
+                String path = currentDir + input[1];
                 if (dirExists(path)) {
                     serverResponse = "+File exists";
                     toRenamePath = path;
@@ -237,7 +238,16 @@ class TCPServer {
                     serverResponse = renameFile(input[1]);
                 }
             }
-
+            // RETR command
+            else if (cmd.equals("RETR")) {
+                String path = currentDir + input[1];
+                if (dirExists(path)) {
+                    serverResponse = String.valueOf(getFileSize(path));
+                }
+                else {
+                    serverResponse = "-File doesn't exist";
+                }
+            }
             
             // send response back to client
             sendResponse(serverResponse);
@@ -488,7 +498,7 @@ class TCPServer {
 
     private static String renameFile(String newFileName) {
         File fileToRename = new File(toRenamePath);
-        File newFile = new File(currentDir + File.separator + newFileName);
+        File newFile = new File(currentDir + newFileName);
         try {
             if (fileToRename.renameTo(newFile)) {
                 String response = "+" + toRenameFilename + " renamed to " + newFileName;
@@ -507,12 +517,18 @@ class TCPServer {
     }
 
     // check dir exists
-    private static boolean dirExists(String dir){
+    private static boolean dirExists(String dir) {
         String path = dir;
         if (new File(path).exists()) {
             return true;
         }
         else { return false; }
     }
-} 
 
+    // get filesize in bytes
+    private static long getFileSize(String dir) {
+        String path = dir;
+        return new File(dir).length();
+    }
+
+}
