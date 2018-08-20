@@ -58,19 +58,19 @@ Checks whether or not `user-id` exists in the system.
 
 Example of valid user ID:
 ```
-$ user a
+$ USER a
 +User-id valid, send account and password
 ```
 
 Example of invalid user ID:
 ```
-$ user c
+$ USER c
 -Invalid user-id, try again
 ```
 
 Example of ADMIN user ID:
 ```
-$ user admin
+$ USER admin
 !ADMIN logged in
 ```
 
@@ -79,15 +79,24 @@ $ user admin
 
 The account to log in as.
 
-Example:
+Example of valid account:
 ```
 $ ACCT a
 +Account valid, send password
 ```
+
+Example of invalid account:
 ```
 $ ACCT does_not_exist
 -Invalid account, try again
 ```
+
+Example of ADMIN account:
+```
+$ ACCT ADMIN
+! Account valid, logged-in
+```
+
 
 ### `PASS` `<password>`
 

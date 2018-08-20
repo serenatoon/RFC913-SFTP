@@ -352,9 +352,16 @@ class TCPServer {
                     serverResponse = "-Invalid use of KILL command";
                 }
             }
-            
+            else {
+                serverResponse = "-Invalid command!";
+            }
+
             // send response back to client
             sendResponse(serverResponse);
+            // close connection if response is negative
+            if (serverResponse.charAt(0) == '-') {
+                connectionSocket.close();
+            }
 
 //			capitalizedSentence = clientInput.toUpperCase() + '\n';
 //
