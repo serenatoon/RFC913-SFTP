@@ -456,41 +456,50 @@ class TCPServer {
     private static String tryAcct(String acct) {
         String response = "";
 
-        try {
-            // json
-            FileReader reader = new FileReader(jsonPath);
-            JSONParser parser = new JSONParser();
-            Object obj = parser.parse(reader);
-            JSONObject jsonObject = new JSONObject(obj.toString());
-            JSONArray users = jsonObject.getJSONArray("users");
-            JSONObject jsonUser;
-            System.out.println("looking for: " + acct);
-            response = "-Invalid account, try again";
-            // iterate through userlist
-            for (int i = 0; i < users.length(); i++) {
-                jsonUser = users.getJSONObject(i);
-                if (acct.equalsIgnoreCase(jsonUser.getString("acc"))) { // user found in json
-                    currentAcc = acct;
-                    currentUser = jsonUser.getString("user");
-                    currentPassword = jsonUser.getString("pw");
-                    accAccepted = true;
-                    userAccepted = true; // ?
-                    if (loggedIn) {
-                        if (cdirSaved == null) { // check that we didn't try execute cdir before
-                            return "! Account valid, logged-in";
+        if (!acct.equalsIgnoreCase("ADMIN")) {
+            try {
+                // json
+                FileReader reader = new FileReader(jsonPath);
+                JSONParser parser = new JSONParser();
+                Object obj = parser.parse(reader);
+                JSONObject jsonObject = new JSONObject(obj.toString());
+                JSONArray users = jsonObject.getJSONArray("users");
+                JSONObject jsonUser;
+                System.out.println("looking for: " + acct);
+                response = "-Invalid account, try again";
+                // iterate through userlist
+                for (int i = 0; i < users.length(); i++) {
+                    jsonUser = users.getJSONObject(i);
+                    if (acct.equalsIgnoreCase(jsonUser.getString("acc"))) { // user found in json
+                        currentAcc = acct;
+                        currentUser = jsonUser.getString("user");
+                        currentPassword = jsonUser.getString("pw");
+                        accAccepted = true;
+                        if (loggedIn) {
+                            if (cdirSaved == null) { // check that we didn't try execute cdir before
+                                return "! Account valid, logged-in";
+                            } else {
+                                return changeDir(cdirSaved);
+                            }
+                        } else {
+                            return "+Account valid, send password";
                         }
-                        else {
-                            return changeDir(cdirSaved);
-                        }
-                    }
-                    else {
-                        return "+Account valid, send password";
                     }
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
-        catch (Exception e) {
-            e.printStackTrace();
+        else {
+            currentAcc = acct;
+            currentUser = "ADMIN";
+            accAccepted = true;
+            loggedIn = true;
+            if (cdirSaved == null) { // check that we didn't try execute cdir before
+                return "! Account valid, logged-in";
+            } else {
+                return changeDir(cdirSaved);
+            }
         }
         return response;
     }
