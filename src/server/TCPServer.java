@@ -97,7 +97,7 @@ class TCPServer {
             else if (cmd.equals("USER")) {
                 if (input.length == 2) {
                     // log in
-                    serverResponse = login(input[1]);
+                    serverResponse = isUser(input[1]);
                 }
                 else if (input.length < 2) {
                     serverResponse = "-Too few arguments";
@@ -408,8 +408,10 @@ class TCPServer {
         return msg;
     }
 
-    // log in
-    private static String login(String userid) {
+    // check that user exists in system
+    // assuming USER command ONLY checks whether or not user exists in system
+    // UNLESS you are ADMIN, in which case you will be logged in
+    private static String isUser(String userid) {
         String response = "";
         String id = userid.toUpperCase();
 
@@ -438,8 +440,6 @@ class TCPServer {
                     jsonUser = users.getJSONObject(i);
                     if (id.equals(jsonUser.getString("user").toUpperCase())) { // user found in json
                         currentUser = id;
-                        currentAcc = jsonUser.getString("acc");
-                        currentPassword = jsonUser.getString("pw");
                         userAccepted = true;
                         return "+User-id valid, send account and password";
                     }
@@ -449,12 +449,10 @@ class TCPServer {
                 e.printStackTrace();
             }
         }
-
         return response;
     }
 
     // ACCT command
-    // RFC 913 protocol doesn't explicitly mention that user had to be found first?
     private static String tryAcct(String acct) {
         String response = "";
 
@@ -532,7 +530,7 @@ class TCPServer {
                     return "+directory ok, send account/password";
                 }
                 else { // currently logged in, so can change dir
-                    currentDir = path;
+                    currentDir = path + File.separator;
                     cdirSaved = null;
                     return "!Changed working dir to " + dir;
                 }
