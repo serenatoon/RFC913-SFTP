@@ -80,16 +80,16 @@ class TCPClient {
 
                      // if positive response, send SEND or STOP
                      if (response.charAt(0) != '-') {
-                         if (hasEnoughDiskSpace(Long.parseLong(response))) {
+                         long filesize = Long.parseLong(response);
+                         if (hasEnoughDiskSpace(filesize)) {
                              sendMessage("SEND");
-                             receiveFile(input[1]);
-                             response = getResponse();
-                             System.out.println("Server response: " + response);
+                             receiveFile(input[1], filesize);
                          }
                          else {
                              sendMessage("STOP");
                          }
                      }
+                     break;
                  default:
                      // send user command to server
                      sendMessage(userInput);
@@ -182,13 +182,13 @@ class TCPClient {
     }
 
     // receive file
-    private static void receiveFile(String filename) {
+    private static void receiveFile(String filename, long filesize) {
         File file = new File(currentDir + filename);
         try {
             FileOutputStream filestream = new FileOutputStream(file, false);
             BufferedOutputStream buf = new BufferedOutputStream(filestream);
 
-            for (int i = 0; i < file.length(); i++) {
+            for (long i = 0; i < filesize; i++) {
                 buf.write(inFromServer.read());
             }
             buf.close();

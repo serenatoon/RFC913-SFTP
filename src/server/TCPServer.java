@@ -613,6 +613,7 @@ class TCPServer {
 
     // send file
     private static boolean sendFile(String dir) {
+        System.out.println("Sending " + dir);
         File file = new File(dir);
         byte[] bytestream = new byte[(int) file.length()];
 
