@@ -210,7 +210,7 @@ $ CDIR a
 Deletes `file-spec` from the current working directory on the server side.
 
 Example of successful deletion:
-Confirm the existence of `a.txt` in current working directory.
+- Confirm the existence of `a.txt` in current working directory.
 ```
 $ KILL a.txt
 +a.txt deleted
@@ -228,10 +228,10 @@ $ KILL b
 Specifies the file to be renamed.  `TOBE` `new-file-spec` should be sent if a `+` response is received.
 
 Example of usage on existing file:
-Confirm the existence of test.txt in the current working directory.
+- Confirm the existence of test.txt in the current working directory.
 ```
 $ NAME test.TXT
-+FILE EXISTS
++File exists
 $ TOBE renamed.txt
 +test.txt renamed to renamed.txt
 ```

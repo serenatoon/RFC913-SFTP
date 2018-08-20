@@ -81,279 +81,261 @@ class TCPServer {
             String cmd = input[0].toUpperCase();
             System.out.println("input0: " + cmd);
 
-            // DONE COMMAND
-            if (cmd.equals("DONE")) {
-                if (input.length == 1) {
-                    serverResponse = "+localhost closing connection";
-                    System.out.println("Connection closed!");
-                    sendResponse(serverResponse);
-                    return;
-                }
-                else {
-                    serverResponse = "-Too many arguments";
-                }
-            }
-            // USER COMMAND
-            else if (cmd.equals("USER")) {
-                if (input.length == 2) {
-                    // log in
-                    serverResponse = isUser(input[1]);
-                }
-                else if (input.length < 2) {
-                    serverResponse = "-Too few arguments";
-                }
-                else if (input.length > 2) {
-                    serverResponse = "-Too many arguments";
-                }
-            }
-            // ACCT COMMAND
-            else if (cmd.equals("ACCT")) {
-                if (input.length == 2) {
-                    // check if account is valid
-                    serverResponse = tryAcct(input[1]);
-                }
-                else if (input.length < 2) {
-                    serverResponse = "-Too few arguments";
-                }
-                else if (input.length > 2) {
-                    serverResponse = "-Too many arguments";
-                }
-            }
-            // PASS COMMAND
-            else if (cmd.equals("PASS")) {
-                if (input.length == 2) {
-                    // check if pw is correct
-                    serverResponse = checkPassword(input[1]);
-                }
-                else if (input.length < 2) {
-                    serverResponse = "-Too few arguments";
-                }
-                else if (input.length > 2) {
-                    serverResponse = "-Too many arguments";
-                }
-            }
-            // TYPE command
-            else if (cmd.equals("TYPE")) {
-                if (!loggedIn) {
-                    serverResponse = "-Not logged in";
-                }
-                else {
+            if (!loggedIn) {
+                // USER COMMAND
+                if (cmd.equals("USER")) {
                     if (input.length == 2) {
-                        switch (input[1].toUpperCase()) {
-                            case "A":
-                                serverResponse = "+Using ASCII mode";
-                                type = 'A';
-                                break;
-                            case "B":
-                                serverResponse = "+Using Binary mode";
-                                type = 'B';
-                                break;
-                            case "C":
-                                serverResponse = "+Using Continuous mode";
-                                type = 'C';
-                                break;
-                            default:
-                                serverResponse = "-Type not valid";
-                                type = 0;
-                                break;
-                        }
-                    }
-                    else if (input.length < 2) {
+                        // log in
+                        serverResponse = isUser(input[1]);
+                    } else if (input.length < 2) {
                         serverResponse = "-Too few arguments";
-                    }
-                    else if (input.length > 2) {
+                    } else if (input.length > 2) {
                         serverResponse = "-Too many arguments";
                     }
                 }
-            }
-            // CDIR command
-            else if (cmd.equals("CDIR")) {
-                if (input.length < 2) {
-                    serverResponse = "-Too few arguments";
+                // ACCT COMMAND
+                else if (cmd.equals("ACCT")) {
+                    if (input.length == 2) {
+                        // check if account is valid
+                        serverResponse = tryAcct(input[1]);
+                    } else if (input.length < 2) {
+                        serverResponse = "-Too few arguments";
+                    } else if (input.length > 2) {
+                        serverResponse = "-Too many arguments";
+                    }
                 }
-                else if (input.length > 2) {
-                    serverResponse = "-Too many arguments";
-                }
-                else {
-                    serverResponse = changeDir(input[1]);
-                }
-            }
-            // LIST command
-            else if (cmd.equals("LIST")) {
-                String listPath = null;
-                if (input.length == 2) {
-                    listPath = currentDir;
-                }
-                else if (input.length == 3) {
-                    listPath = currentDir + input[2];
-                }
-                else if (input.length < 2) {
-                    serverResponse = "-Too few arguments";
-                }
-                else if (input.length > 3) {
-                    serverResponse = "-Too many arguments";
-                }
-
-                if (listPath != null) {
-                    switch (input[1].toUpperCase()) {
-                        case "F":
-                            if (dirExists(listPath)) {
-                                serverResponse = getFormattedListing(listPath);
-                            }
-                            else {
-                                serverResponse = "-Could not get directory listing because directory does not exist";
-                            }
-                            break;
-                        case "V":
-                            if (dirExists(listPath)) {
-                                serverResponse = getVerboseListing(listPath);
-                            }
-                            else {
-                                serverResponse = "-Could not get directory listing because directory does not exist";
-                            }
-                            break;
-                        default:
-                            serverResponse = "-Invalid LIST query";
-                            break;
+                // PASS COMMAND
+                else if (cmd.equals("PASS")) {
+                    if (input.length == 2) {
+                        // check if pw is correct
+                        serverResponse = checkPassword(input[1]);
+                    } else if (input.length < 2) {
+                        serverResponse = "-Too few arguments";
+                    } else if (input.length > 2) {
+                        serverResponse = "-Too many arguments";
                     }
                 }
                 else {
-                    serverResponse = "-listPath is null??";
+                    serverResponse = "-Invalid command, please log in";
                 }
             }
-            // NAME command
-            else if (cmd.equals("NAME")) {
-                String path = currentDir + input[1];
-                if (dirExists(path)) {
-                    serverResponse = "+File exists";
-                    toRenamePath = path;
-                    toRenameFilename = input[1];
-                }
-                else {
-                    serverResponse = "-Can't find " + input[1];
-                }
-            }
-            // TOBE command
-            else if (cmd.equals("TOBE")) {
-                if (toRenamePath == null) {
-                    serverResponse = "-File wasn't renamed because you never issued NAME command";
-                }
-                else {
-                    serverResponse = renameFile(input[1]);
-                }
-            }
-            // RETR command
-            else if (cmd.equals("RETR")) {
-                String path = currentDir + input[1];
-                if (dirExists(path)) {
-                    serverResponse = String.valueOf(getFileSize(path));
-                    toRetrieve = path;
-                }
-                else {
-                    serverResponse = "-File doesn't exist";
-                    toRetrieve = null;
-                }
-            }
-            // STOP command
-            else if (cmd.equals("STOP")) {
-                toRetrieve = null;
-                serverResponse = "+ok, RETR aborted";
-            }
-            // SEND command
-            else if (cmd.equals("SEND")) {
-                sendFile(toRetrieve);
-                toRetrieve = null;
-            }
-            // STOR command
-            else if (cmd.equals("STOR")) {
-                String path = currentDir + input[2];
-                String mode = input[1].toUpperCase();
-                boolean isValidMode = false;
-                if (input.length == 3) {
-                    switch (mode) {
-                        case "NEW":
-                            if (dirExists(path)) {
-                                serverResponse = "-File exists, but system doesn't support generations";
-                            } else {
-                                serverResponse = "+File does not exist, will create new file";
-                                append = false;
-                            }
-                            isValidMode = true;
-                            break;
-                        case "OLD":
-                            if (dirExists(path)) {
-                                serverResponse = "+Will write over old file";
-                                append = false; // do not append -- should overwrite
-                            } else {
-                                serverResponse = "+Will create new file";
-                            }
-                            isValidMode = true;
-                            break;
-                        case "APP":
-                            if (dirExists(path)) {
-                                serverResponse = "+Will append to file";
-                                append = true;
-                            } else {
-                                serverResponse = "+Will create file";
-                                append = false;
-                            }
-                            isValidMode = true;
-                            break;
-                        default:
-                            serverResponse = "-Invalid use of STOR command";
-                            isValidMode = false;
-                            break;
-                    }
-
-                    // assign global path and mode; prepare for future commands
-                    if (isValidMode) {
-                        toStore = path;
-                        toStoreFilename = input[2];
-                    } else {
-                        toStore = null;
-                    }
-                }
-                else {
-                    serverResponse = "-Invalid use of STOR command";
-                }
-            }
-            // SIZE command
-            else if (cmd.equals("SIZE")) {
-                try {
-                    long filesize = Long.parseLong(input[1]); // might throw NumberFormatException if too big
-
-                    if (hasEnoughDiskSpace(filesize)) {
-                        System.out.println("Enough space");
-                        isStoring = true;
-                        storeSize = filesize;
-                        sendResponse("+ok, waiting for file");
-                        System.out.println("Storing file....");
-                        serverResponse = storeFile();
+            else { // these commands cannot be specified unless logged in
+                // DONE COMMAND
+                if (cmd.equals("DONE")) {
+                    if (input.length == 1) {
+                        serverResponse = "+localhost closing connection";
+                        System.out.println("Connection closed!");
+                        sendResponse(serverResponse);
+                        return;
                     }
                     else {
-                        System.out.println("Not enough space");
+                        serverResponse = "-Too many arguments";
+                    }
+                }
+                // TYPE command
+                else if (cmd.equals("TYPE")) {
+                    if (!loggedIn) {
+                        serverResponse = "-Not logged in";
+                    } else {
+                        if (input.length == 2) {
+                            switch (input[1].toUpperCase()) {
+                                case "A":
+                                    serverResponse = "+Using ASCII mode";
+                                    type = 'A';
+                                    break;
+                                case "B":
+                                    serverResponse = "+Using Binary mode";
+                                    type = 'B';
+                                    break;
+                                case "C":
+                                    serverResponse = "+Using Continuous mode";
+                                    type = 'C';
+                                    break;
+                                default:
+                                    serverResponse = "-Type not valid";
+                                    type = 0;
+                                    break;
+                            }
+                        } else if (input.length < 2) {
+                            serverResponse = "-Too few arguments";
+                        } else if (input.length > 2) {
+                            serverResponse = "-Too many arguments";
+                        }
+                    }
+                }
+                // CDIR command
+                else if (cmd.equals("CDIR")) {
+                    if (input.length < 2) {
+                        serverResponse = "-Too few arguments";
+                    } else if (input.length > 2) {
+                        serverResponse = "-Too many arguments";
+                    } else {
+                        serverResponse = changeDir(input[1]);
+                    }
+                }
+                // LIST command
+                else if (cmd.equals("LIST")) {
+                    String listPath = null;
+                    if (input.length == 2) {
+                        listPath = currentDir;
+                    } else if (input.length == 3) {
+                        listPath = currentDir + input[2];
+                    } else if (input.length < 2) {
+                        serverResponse = "-Too few arguments";
+                    } else if (input.length > 3) {
+                        serverResponse = "-Too many arguments";
+                    }
+
+                    if (listPath != null) {
+                        switch (input[1].toUpperCase()) {
+                            case "F":
+                                if (dirExists(listPath)) {
+                                    serverResponse = getFormattedListing(listPath);
+                                } else {
+                                    serverResponse = "-Could not get directory listing because directory does not exist";
+                                }
+                                break;
+                            case "V":
+                                if (dirExists(listPath)) {
+                                    serverResponse = getVerboseListing(listPath);
+                                } else {
+                                    serverResponse = "-Could not get directory listing because directory does not exist";
+                                }
+                                break;
+                            default:
+                                serverResponse = "-Invalid LIST query";
+                                break;
+                        }
+                    } else {
+                        serverResponse = "-listPath is null??";
+                    }
+                }
+                // NAME command
+                else if (cmd.equals("NAME")) {
+                    String path = currentDir + input[1];
+                    if (dirExists(path)) {
+                        serverResponse = "+File exists";
+                        toRenamePath = path;
+                        toRenameFilename = input[1];
+                    } else {
+                        serverResponse = "-Can't find " + input[1];
+                    }
+                }
+                // TOBE command
+                else if (cmd.equals("TOBE")) {
+                    if (toRenamePath == null) {
+                        serverResponse = "-File wasn't renamed because you never issued NAME command";
+                    } else {
+                        serverResponse = renameFile(input[1]);
+                    }
+                }
+                // RETR command
+                else if (cmd.equals("RETR")) {
+                    String path = currentDir + input[1];
+                    if (dirExists(path)) {
+                        serverResponse = String.valueOf(getFileSize(path));
+                        toRetrieve = path;
+                    } else {
+                        serverResponse = "-File doesn't exist";
+                        toRetrieve = null;
+                    }
+                }
+                // STOP command
+                else if (cmd.equals("STOP")) {
+                    toRetrieve = null;
+                    serverResponse = "+ok, RETR aborted";
+                }
+                // SEND command
+                else if (cmd.equals("SEND")) {
+                    sendFile(toRetrieve);
+                    toRetrieve = null;
+                }
+                // STOR command
+                else if (cmd.equals("STOR")) {
+                    String path = currentDir + input[2];
+                    String mode = input[1].toUpperCase();
+                    boolean isValidMode = false;
+                    if (input.length == 3) {
+                        switch (mode) {
+                            case "NEW":
+                                if (dirExists(path)) {
+                                    serverResponse = "-File exists, but system doesn't support generations";
+                                } else {
+                                    serverResponse = "+File does not exist, will create new file";
+                                    append = false;
+                                }
+                                isValidMode = true;
+                                break;
+                            case "OLD":
+                                if (dirExists(path)) {
+                                    serverResponse = "+Will write over old file";
+                                    append = false; // do not append -- should overwrite
+                                } else {
+                                    serverResponse = "+Will create new file";
+                                }
+                                isValidMode = true;
+                                break;
+                            case "APP":
+                                if (dirExists(path)) {
+                                    serverResponse = "+Will append to file";
+                                    append = true;
+                                } else {
+                                    serverResponse = "+Will create file";
+                                    append = false;
+                                }
+                                isValidMode = true;
+                                break;
+                            default:
+                                serverResponse = "-Invalid use of STOR command";
+                                isValidMode = false;
+                                break;
+                        }
+
+                        // assign global path and mode; prepare for future commands
+                        if (isValidMode) {
+                            toStore = path;
+                            toStoreFilename = input[2];
+                        } else {
+                            toStore = null;
+                        }
+                    } else {
+                        serverResponse = "-Invalid use of STOR command";
+                    }
+                }
+                // SIZE command
+                else if (cmd.equals("SIZE")) {
+                    try {
+                        long filesize = Long.parseLong(input[1]); // might throw NumberFormatException if too big
+
+                        if (hasEnoughDiskSpace(filesize)) {
+                            System.out.println("Enough space");
+                            isStoring = true;
+                            storeSize = filesize;
+                            sendResponse("+ok, waiting for file");
+                            System.out.println("Storing file....");
+                            serverResponse = storeFile();
+                        } else {
+                            System.out.println("Not enough space");
+                            serverResponse = "-Not enough room, don't send it";
+                            isStoring = false;
+                            storeSize = 0;
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
                         serverResponse = "-Not enough room, don't send it";
-                        isStoring = false;
                         storeSize = 0;
                     }
                 }
-                catch (Exception e) {
-                    e.printStackTrace();
-                    serverResponse = "-Not enough room, don't send it";
-                    storeSize = 0;
+                // KILL command
+                else if (cmd.equals("KILL")) {
+                    if (input.length == 2) {
+                        serverResponse = deleteFile(input[1]);
+                    } else {
+                        serverResponse = "-Invalid use of KILL command";
+                    }
+                } else {
+                    serverResponse = "-Invalid command!";
                 }
-            }
-            // KILL command
-            else if (cmd.equals("KILL")) {
-                if (input.length == 2) {
-                    serverResponse = deleteFile(input[1]);
-                }
-                else {
-                    serverResponse = "-Invalid use of KILL command";
-                }
-            }
-            else {
-                serverResponse = "-Invalid command!";
             }
 
             // send response back to client
