@@ -7,6 +7,7 @@ package client;
 import java.io.*; 
 import java.net.*;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 
 class TCPClient {
 
@@ -78,6 +79,8 @@ class TCPClient {
                      break;
                  case "RETR":
                      sendMessage(userInput);
+                     System.out.println(userInput);
+                     String filename = input[1];
                      response = getResponse();
                      System.out.println("Response: " + response);
 
@@ -86,7 +89,8 @@ class TCPClient {
                          long filesize = Long.parseLong(response);
                          if (hasEnoughDiskSpace(filesize)) {
                              sendMessage("SEND");
-                             receiveFile(input[1], filesize);
+                             response = getResponse();
+                             receiveFile(response.substring(0, response.length() - 1), filename);
                          }
                          else {
                              sendMessage("STOP");
@@ -191,17 +195,11 @@ class TCPClient {
     }
 
     // receive file
-    private static void receiveFile(String filename, long filesize) {
-        File file = new File(currentDir + filename);
+    private static void receiveFile(String data, String filename) {
+        String path = currentDir + filename;
+        byte[] bytestream = data.getBytes();
         try {
-            FileOutputStream filestream = new FileOutputStream(file, false);
-            BufferedOutputStream buf = new BufferedOutputStream(filestream);
-
-            for (long i = 0; i < filesize; i++) {
-                buf.write(inFromServer.read());
-            }
-            buf.close();
-            filestream.close();
+            Files.write(Paths.get(path), bytestream);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -213,7 +211,6 @@ class TCPClient {
         File currDir = new File(currentDir);
         try {
             long space = Files.getFileStore(currDir.toPath().toRealPath()).getUsableSpace();
-            System.out.println("Free space: " + space);
             return (space > filesize);
         }
         catch (Exception e) {

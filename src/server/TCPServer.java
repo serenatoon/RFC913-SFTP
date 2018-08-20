@@ -232,8 +232,10 @@ class TCPServer {
                 // RETR command
                 else if (cmd.equals("RETR")) {
                     String path = currentDir + input[1];
+                    System.out.println(path);
                     if (dirExists(path)) {
                         serverResponse = String.valueOf(getFileSize(path));
+                        System.out.println(serverResponse);
                         toRetrieve = path;
                     } else {
                         serverResponse = "-File doesn't exist";
@@ -247,7 +249,8 @@ class TCPServer {
                 }
                 // SEND command
                 else if (cmd.equals("SEND")) {
-                    sendFile(toRetrieve);
+                    System.out.println("Sending: " + toRetrieve);
+                    serverResponse = getFileString(new File(toRetrieve));
                     toRetrieve = null;
                 }
                 // STOR command
@@ -339,6 +342,7 @@ class TCPServer {
             }
 
             // send response back to client
+            System.out.println("server response: " + serverResponse);
             sendResponse(serverResponse);
             // close connection if response is negative
             if (serverResponse.charAt(0) == '-') {
@@ -355,6 +359,7 @@ class TCPServer {
 
     // send string to client
     private static void sendResponse(String msg) {
+        System.out.println("msg: " + msg);
         try {
             outToClient.writeBytes(msg + "\0");
         }
@@ -665,29 +670,12 @@ class TCPServer {
     }
 
     // send file
-    private static boolean sendFile(String dir) {
-        System.out.println("Sending " + dir);
-        File file = new File(dir);
-        byte[] bytestream = new byte[(int) file.length()];
-
+    private static String getFileString(File file) {
         try {
-            FileInputStream filestream = new FileInputStream(file);
-            BufferedInputStream buf = new BufferedInputStream(filestream);
-
-            int data = 0;
-            // read file, as long as there is data, send it
-            while ((data = buf.read(bytestream)) >= 0) {
-                outToClient.write(bytestream, 0, data); // send
-            }
-            buf.close();
-            filestream.close();
-            outToClient.flush();
-
-            return true; // successfully sent
+            return  new String(Files.readAllBytes(file.toPath()));
         }
         catch (Exception e) {
-            e.printStackTrace();
-            return false;
+            return null;
         }
     }
 
@@ -743,7 +731,6 @@ class TCPServer {
         File currDir = new File(currentDir);
         try {
             long space = Files.getFileStore(currDir.toPath().toRealPath()).getUsableSpace();
-            System.out.println("Free space: " + space);
             return (space > filesize);
         }
         catch (Exception e) {

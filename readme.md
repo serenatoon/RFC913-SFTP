@@ -19,8 +19,9 @@
 - Whenever a `-` response is received from the server, the connection will be aborted.  Both programs must be executed again.
 - Runs on `localhost`; port `6789`.
 - Examples show user input prefixed with `$`.  This is for display purposes and should not be included in your input.
-- 'Current directory' refers to the currently-assigned directory.  Before a `CDIR` command is run, this refers to `res/server/` on the server side, and `res/client/` on the client side.
+- 'Current directory'/'current working directory' refers to the currently-assigned directory.  Before a `CDIR` command is run, this refers to `res/server/` on the server side, and `res/client/` on the client side.
 - When a directory/file is specified, it should be relative to the 'current directory'.
+- If not logged in, only commands `USER`, `ACCT`, `PASS` can be specified.
 
 ### Logging in
 There are currently 3 accounts for testing, stored in `res/users.json`:
@@ -252,3 +253,18 @@ Example:
 $ DONE
 +localhost closing connection
 ```
+
+### `RETR` `file-spec`
+
+Retrieves `file-spec` from the remote system.  This means it will place `file-spec` under the current server-side working directory into the current working directory on the client side.  Client program is self-sufficient in sending the appropriate commands following `RETR` (i.e. `SEND`, `STOP`).
+
+Example of existing file:
+- Confirm the existence of file `retr.txt` in the current server-side working directory (file is already there if current working directory has not been changed with `CDIR`).
+- Confirm the contents of `retr.txt` to be `aaaaa`, filesize `5 bytes`.
+```
+$ RETR retr.txt
+5
+```
+Observe that `retr.txt` has been successfully copied over to the current working directory on the client side.
+
+Example of non-existent file:
