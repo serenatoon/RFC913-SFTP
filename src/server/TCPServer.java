@@ -615,6 +615,9 @@ class TCPServer {
                 if (fileList[i].isFile()) {
                     response += fileList[i].getName() + System.getProperty("line.separator");
                 }
+                else if (fileList[i].isDirectory()) {
+                    response += fileList[i] + File.separator + System.getProperty("line.separator");
+                }
             }
             return response;
         }
@@ -647,6 +650,9 @@ class TCPServer {
                         e.printStackTrace();;
                     }
                     response += fileList[i].getName() + "    " + dateModified + "    " + filesize + "    " + owner + System.getProperty("line.separator");
+                }
+                else if (fileList[i].isDirectory()) {
+                    response += fileList[i] + File.separator + System.getProperty("line.separator");
                 }
             }
             return response;

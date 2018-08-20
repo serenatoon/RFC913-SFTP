@@ -149,12 +149,14 @@ If `directory` is not specified, the current directory will be used.
 `V` specifies the verbose directory listing.  This displays filename, last modified date and time, filesize, and file owner.
 
 Example of `LIST F`:
+- Navigate to `/res/server` and observe the files in the directory.
 ```
 $ LIST F
 +E:\Documents\cs725_a1\res\server\
 client.txt
 retr_test.txt
 ```
+The output should match the files shown.
 
 Example of `LIST V`:
 ```
@@ -201,4 +203,14 @@ Example of non-existent directory:
 ```
 $ CDIR a
 -Can't connect to working directory because: Directory does not exist
+```
+
+### `KILL` `file-spec`
+
+Deletes `file-spec` from the current working directory on the server side.
+
+Example of successful deletion:
+```
+$ KILL client.txt
++client.txt deleted
 ```
