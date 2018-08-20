@@ -30,6 +30,7 @@ class TCPServer {
     private static String toRenamePath = null;
     private static String toRenameFilename = null;
     private static boolean isRetrieving = false;
+    private static String toRetrieve = null;
 
     private static boolean loggedIn = false;
     private static String currentUser = null;
@@ -243,9 +244,49 @@ class TCPServer {
                 String path = currentDir + input[1];
                 if (dirExists(path)) {
                     serverResponse = String.valueOf(getFileSize(path));
+                    toRetrieve = path;
                 }
                 else {
                     serverResponse = "-File doesn't exist";
+                    toRetrieve = null;
+                }
+            }
+            // STOP command
+            else if (cmd.equals("STOP")) {
+                toRetrieve = null;
+                serverResponse = "+ok, RETR aborted";
+            }
+            // SEND command
+            else if (cmd.equals("SEND")) {
+                sendFile(toRetrieve);
+                toRetrieve = null;
+            }
+            // STOR command
+            else if (cmd.equals("STOR")) {
+                String path = currentDir + input[2];
+                switch (input[1].toUpperCase()) {
+                    case "NEW":
+                        if (dirExists(path)) {
+                            serverResponse = "-File exists, but system doesn't support generations";
+                        }
+                        else {
+                            serverResponse = "File does not exist, will create new file";
+                        }
+                        break;
+                    case "OLD":
+                        if (dirExists(path)) {
+                            serverResponse = "+Will write over old file";
+                        }
+                        else {
+                            serverResponse = "+Will create new file";
+                        }
+                    case "APP":
+                        if (dirExists(path)) {
+                            serverResponse = "+Will append to file";
+                        }
+                        else {
+                            serverResponse = "+Will create file";
+                        }
                 }
             }
             
@@ -513,6 +554,32 @@ class TCPServer {
         catch (Exception e) {
             e.printStackTrace();
             return "-File wasn't renamed because " + e.toString();
+        }
+    }
+
+    // send file
+    private static boolean sendFile(String dir) {
+        File file = new File(dir);
+        byte[] bytestream = new byte[(int) file.length()];
+
+        try {
+            FileInputStream filestream = new FileInputStream(file);
+            BufferedInputStream buf = new BufferedInputStream(new FileInputStream(file));
+
+            int data = 0;
+            // read file, as long as there is data, send it
+            while ((data = buf.read(bytestream)) >= 0) {
+                outToClient.write(bytestream, 0, data); // send
+            }
+            buf.close();
+            filestream.close();
+            outToClient.flush();
+
+            return true; // successfully sent
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
     }
 
