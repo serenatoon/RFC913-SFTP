@@ -29,12 +29,11 @@ class TCPServer {
     private static String cdirSaved = null;
     private static String toRenamePath = null;
     private static String toRenameFilename = null;
-    private static boolean isRetrieving = false;
     private static String toRetrieve = null;
     private static String toStore = null;
     private static String storeMode = null;
     private static boolean isStoring = false;
-    private static boolean overwrite = false;
+    private static boolean append = true;
     private static long storeSize = 0;
     private static String toStoreFilename = null;
 
@@ -279,13 +278,14 @@ class TCPServer {
                                 serverResponse = "-File exists, but system doesn't support generations";
                             } else {
                                 serverResponse = "+File does not exist, will create new file";
+                                append = false;
                             }
                             isValidMode = true;
                             break;
                         case "OLD":
                             if (dirExists(path)) {
                                 serverResponse = "+Will write over old file";
-                                overwrite = true;
+                                append = false; // do not append -- should overwrite
                             } else {
                                 serverResponse = "+Will create new file";
                             }
@@ -294,8 +294,10 @@ class TCPServer {
                         case "APP":
                             if (dirExists(path)) {
                                 serverResponse = "+Will append to file";
+                                append = true;
                             } else {
                                 serverResponse = "+Will create file";
+                                append = false;
                             }
                             isValidMode = true;
                             break;
@@ -642,7 +644,7 @@ class TCPServer {
     private static String storeFile() {
         System.out.println("Storing file at: " + toStore);
         try {
-            FileOutputStream filestream = new FileOutputStream(toStore, overwrite);
+            FileOutputStream filestream = new FileOutputStream(toStore, append);
             BufferedOutputStream buf = new BufferedOutputStream(filestream);
 
             for (int i = 0; i < storeSize; i++) {
