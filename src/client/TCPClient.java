@@ -66,6 +66,8 @@ class TCPClient {
                          System.out.println("response: " + response);
                          if (response.charAt(0) == '+') {
                              sendFile(fileToSend);
+                             response = getResponse();
+                             System.out.println("Server response: " + response);
                          }
                      }
                      break;
