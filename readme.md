@@ -19,6 +19,7 @@
 - Whenever a `-` response is received from the server, the connection will be aborted.  Both programs must be executed again.
 - Runs on `localhost`; port `6789`.
 - Examples show user input prefixed with `$`.  This is for display purposes and should not be included in your input.
+- 'Current directory' refers to the currently-assigned directory.  Before a `CDIR` command is run, this refers to `res/server/` on the server side, and `res/client/` on the client side.
 
 ### Logging in
 There are currently 3 accounts for testing, stored in `res/users.json`:
@@ -102,30 +103,57 @@ $ ACCT ADMIN
 
 The password for the account you are trying to log in with.
 
-Example:
+Example of correct password:
 ```
 $ PASS a
 ! Logged in
 ```
-TODO
+
+Example of incorrect password:
+```
+$ PASS B
+-Wrong password, try again
+```
 
 ### `TYPE` `{A | B | C }`
 
-Changes the mapping of the stored file and transmission byte stream.  Default mode is binary. TODO
+Changes the mapping of the stored file and transmission byte stream.  Default mode is binary. 
 
-Example:
+Example of valid type:
 ```
 $ TYPE C
 +Using Continuous mode
 ```
-TODO
+
+Example that this command cannot be specified until a `!` response is received from the remote system:
+```
+$ TYPE A
+-Not logged in
+```
+
+Example of invalid type:
+```
+$ TYPE F
+-Type not valid
+```
 
 ### `LIST` `{F | V}` `<directory>`
 
 List all files and folders under `directory`.
 
-If `directory` is not specified, the current directory will be used.  
+If `directory` is not specified, the current directory will be used.
 
 `F` specifies the standard-formatted directory listing; only showing filenames.
 
 `V` specifies the verbose directory listing.  This displays filename, last modified date and time, filesize, and file owner.
+
+Example of `LIST F`:
+```
+$ LIST F
++E:\Documents\cs725_a1\res\server\
+client.txt
+retr_test.txt
+```
+
+Example of `LIST V`:
+

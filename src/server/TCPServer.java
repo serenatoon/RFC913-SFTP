@@ -574,7 +574,7 @@ class TCPServer {
                     response += fileList[i].getName() + System.getProperty("line.separator");
                 }
             }
-            return response + '\0';
+            return response;
         }
         catch (Exception e) {
             return "-Could not get formatted listing because: " + e.toString();
@@ -607,7 +607,7 @@ class TCPServer {
                     response += fileList[i].getName() + "    " + dateModified + "    " + filesize + "    " + owner + System.getProperty("line.separator");
                 }
             }
-            return response + '\0';
+            return response;
         }
         catch (Exception e) {
             return "-Could not get formatted listing because: " + e.toString();
