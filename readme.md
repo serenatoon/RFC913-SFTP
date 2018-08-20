@@ -210,7 +210,45 @@ $ CDIR a
 Deletes `file-spec` from the current working directory on the server side.
 
 Example of successful deletion:
+Confirm the existence of `a.txt` in current working directory.
 ```
-$ KILL client.txt
-+client.txt deleted
+$ KILL a.txt
++a.txt deleted
+```
+File can now be observed to be deleted from directory.
+
+Example of unsuccessful deletion -- file does not exist:
+```
+$ KILL b
+-File could not be deleted
+```
+
+### `NAME` `old-file-spec`
+
+Specifies the file to be renamed.  `TOBE` `new-file-spec` should be sent if a `+` response is received.
+
+Example of usage on existing file:
+Confirm the existence of test.txt in the current working directory.
+```
+$ NAME test.TXT
++FILE EXISTS
+$ TOBE renamed.txt
++test.txt renamed to renamed.txt
+```
+Observe that `test.txt` no longer exists, and has been renamed to `renamed.txt`.
+
+Example of usage on non-existent file:
+```
+$ NAME does_not_exist.txt
+-Can't find does_not_exist.txt
+```
+
+### `DONE`
+
+Tells remote system you are done.  Closes connection on both sides.
+
+Example:
+```
+$ DONE
++localhost closing connection
 ```

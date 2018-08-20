@@ -102,7 +102,7 @@ class TCPClient {
                      response = getResponse();
                      System.out.println("Server response: " + response);
                      // if closing connection
-                     if (userInput.equals("DONE") && response.charAt(0) == '+') {
+                     if (userInput.equalsIgnoreCase("DONE") && response.charAt(0) == '+') {
                          isConnected = false;
                      }
                      else if (response.charAt(0) == '-') {
