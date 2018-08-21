@@ -1,18 +1,20 @@
 # CS725 Assignment 1
 
 - All commands completed.
-- Tested on Windows on Eclipse.
+- Tested on Windows on Eclipse [Java Neon].
 
 ## Run instructions
 
 1. Open Eclipse
-2. Open project from file system
-3. Expand `src` directory in the Package Explorer.
-4. Run `TCPServer.java` found under `src/server` folder.
-5. Run `TCPClient.java` found under the `src/client` folder.
-6. `Create new console view` to view consoles for both programs.
-7. Select `TCPServer.java` tab and select `Display selected console` to view both consoles.
-8. Input should be entered in the `TCPClient` console.
+2. Import project
+3. Select general -> Existing Projects into Workspace.  Click Next.
+4. Select root directory of submission.  Finish.
+5. Expand `src` directory in the Package Explorer.
+5. Run `TCPServer.java` found under `src/server` folder.
+6. Run `TCPClient.java` found under the `src/client` folder.
+7. `Create new console view` to view consoles for both programs.
+8. Select `TCPServer.java` tab and select `Display selected console` to view both consoles.
+9. Input should be entered in the `TCPClient` console.
 
 ## Notes
 
