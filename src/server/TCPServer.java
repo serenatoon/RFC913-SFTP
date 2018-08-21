@@ -359,7 +359,6 @@ class TCPServer {
 
     // send string to client
     private static void sendResponse(String msg) {
-        System.out.println("msg: " + msg);
         try {
             outToClient.writeBytes(msg + "\0");
         }

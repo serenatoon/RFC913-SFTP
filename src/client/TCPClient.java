@@ -79,7 +79,6 @@ class TCPClient {
                      break;
                  case "RETR":
                      sendMessage(userInput);
-                     System.out.println(userInput);
                      String filename = input[1];
                      response = getResponse();
                      System.out.println("Response: " + response);

@@ -265,6 +265,83 @@ Example of existing file:
 $ RETR retr.txt
 5
 ```
-Observe that `retr.txt` has been successfully copied over to the current working directory on the client side.
+`5` denotes the number of bytes the file contains.  Observe that `retr.txt` has been successfully copied over to the current working directory on the client side.
 
 Example of non-existent file:
+```
+$ RETR doesnotexist.txt
+-File doesn't exist
+```
+
+### `STOR` `{NEW | OLD | APP }` `file-spec`
+
+Stores `file-spec` in the remote system.
+
+#### `NEW`
+
+Specifies it should create a new generation of the file.  However, the remote system currently does not support new generations.  This means that if the file is detected to already exist on the remote system, a negative response will be sent.  If the file does not exist on the remote system (current server working directory), the file will be created.
+
+Example of file not existing on remote system, but is on client:
+```
+$ STOR NEW stor.txt
++File does not exist, will create new file
++ok, waiting for file
+Saved stor.txt
+```
+Examine that `stor.txt` is now in the server working directory.
+
+Now that `stor.txt` exists in the remote system, we can now test the 'new generation' condition:
+```
+$ STOR NEW stor.txt
+-File exists, but system doesn't support generations
+```
+
+#### `OLD`
+
+If `OLD` is specified, it will write over the existing `file-spec` if it already exists.
+
+Example of overwriting:
+- Examine the contents of `overwrite.txt` in the server working directory.  If `CDIR` has not been run, this should be under `/res/server/`.  Contents of the txt file should be `a`.
+- Examine the contents of `overwrite.txt` in the client working directory.  If `CIDR` has not been run, this should be under `/res/client/`.  Contents of the txt file should be `b`.
+```
+$ STOR OLD overwrite.txt
++Will write over old file
++ok, waiting for file
++Saved overwrite.txt
+```
+- Now, open `overwrite.txt` in the server working directory.  Contents of the txt file should now be `b`.
+
+Example of new file creation (i.e. file does not exist on remote):
+```
+$ STOR OLD new.txt
++Will create new file
++ok, waiting for file
++Saved new.txt
+```
+Examine that `new.txt` is now in the remote working directory.
+
+#### `APP`
+
+`APP` specifies that the new file contents should be appended onto the existing file, if it exists.  If file does not exist, it will create the new file on the remote.
+
+Example of append:
+- Confirm the existence of `exists.txt` in the server working directory.
+- Confirm the contents of this `exists.txt` to be `a`.
+- Confirm the existence ofe `exists.txt` in the client working directory.
+- Confirm the contents of this `exists.txt` to be `b`.
+```
+$ STOR APP exists.txt
++Will append to file
++ok, waiting for file
++Saved exists.txt
+```
+- Examine the contents of `exists.txt` in the server working directory.  Contents should now be `ab`.
+
+Example of new file creation:
+- Assuming `new.txt` has been deleted on the server working directory
+```
+$ STOR APP new.txt
++Will create file
++ok, waiting for file
++Saved new.txt
+```
