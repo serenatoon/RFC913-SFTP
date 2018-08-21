@@ -16,12 +16,14 @@
 
 ## Notes
 
-- Whenever a `-` response is received from the server, the connection will be aborted.  Both programs must be executed again.
+- Whenever a `-` response is received from the server, the connection will be aborted.
+- When connection is aborted, both programs must be run again.  This can happen with a `-` response, or when `DONE` is specified.
 - Runs on `localhost`; port `6789`.
 - Examples show user input prefixed with `$`.  This is for display purposes and should not be included in your input.
 - 'Current directory'/'current working directory' refers to the currently-assigned directory.  Before a `CDIR` command is run, this refers to `res/server/` on the server side, and `res/client/` on the client side.
 - When a directory/file is specified, it should be relative to the 'current directory'.
 - If not logged in, only commands `USER`, `ACCT`, `PASS` can be specified.
+- User input is not case-sensitive.
 
 ### Logging in
 There are currently 3 accounts for testing, stored in `res/users.json`:
@@ -275,7 +277,7 @@ $ RETR doesnotexist.txt
 
 ### `STOR` `{NEW | OLD | APP }` `file-spec`
 
-Stores `file-spec` in the remote system.
+Stores `file-spec` in the remote system.  Note that the RFC 913 Standard does not specify any error handling if `file-spec` does not exist.  Therefore this has not been accounted for.
 
 #### `NEW`
 
