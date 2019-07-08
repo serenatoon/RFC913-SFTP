@@ -1,7 +1,6 @@
-# CS725 Assignment 1
+# RFC 913: Simple File Transfer Protocol
 
-- All commands completed.
-- Tested on Windows on Eclipse [Java Neon].
+- Tested and developed on Windows on Eclipse [Java Neon].
 
 ## Run instructions
 
@@ -52,7 +51,7 @@ password: pw
 
 ### Directory structure 
 
-Assuming root folder is `cs725_a1`,
+Assuming root folder is `RFC913-SFTP`,
 - Source files are located in `/src/`
 - Resources are located in `/res/`
 	- Files stored on the server are located in `/res/server/`
@@ -157,7 +156,7 @@ Example of `LIST F`:
 - Navigate to `/res/server` and observe the files in the directory.
 ```
 $ LIST F
-+E:\Documents\cs725_a1\res\server\
++E:\Documents\RFC913-SFTP\res\server\
 client.txt
 retr_test.txt
 ```
@@ -166,7 +165,7 @@ The output should match the files shown.
 Example of `LIST V`:
 ```
 $ LIST V
-+E:\Documents\cs725_a1\res\server\
++E:\Documents\RFC913-SFTP\res\server\
 client.txt    20/08/2018 20:34    1    BUILTIN\Administrators
 retr_test.txt    20/08/2018 20:20    8    BUILTIN\Administrators
 ```
@@ -174,7 +173,7 @@ retr_test.txt    20/08/2018 20:20    8    BUILTIN\Administrators
 Example of `LIST F`, specifying directory `test`:
 ```
 $ LIST F test
-+E:\Documents\cs725_a1\res\server\test
++E:\Documents\RFC913-SFTP\res\server\test
 a.txt
 sdfsdf.txt
 ```
